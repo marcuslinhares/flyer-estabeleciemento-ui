@@ -3,7 +3,7 @@ import 'package:pocketbase/pocketbase.dart';
 import '../models/product_model.dart';
 
 class ProductViewModel extends ChangeNotifier {
-  final pb = PocketBase('https://api.flyer.marcuslinhares.ip-ddns.com');
+  final pb = PocketBase('api.flyer.marcuslinhares.ip-ddns.com');
 
   List<ProductModel> _products = [];
   List<ProductModel> get products => _products;
