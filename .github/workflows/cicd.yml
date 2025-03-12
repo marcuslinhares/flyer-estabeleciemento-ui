@@ -21,8 +21,6 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
-      - name: Set up environment variables
-
       - name: Build APK
         run: flutter build apk --release
 
