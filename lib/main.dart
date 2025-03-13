@@ -20,8 +20,7 @@ class _MyAppState extends State<MyApp> {
     super.initState();
     _controller = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
-      ..loadRequest(
-          Uri.parse('https://flyer-admin-ui-cjwsfe.flutterflow.app/'));
+      ..loadRequest(Uri.parse('https://flyer-admin-ui.flutterflow.app/'));
   }
 
   @override
