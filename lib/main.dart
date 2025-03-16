@@ -20,7 +20,15 @@ class _MyAppState extends State<MyApp> {
     super.initState();
     _controller = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
-      ..loadRequest(Uri.parse('https://flyer-admin-ui.flutterflow.app/'));
+      ..setBackgroundColor(Colors.white);
+
+    _limparCacheECarregar();
+  }
+
+  Future<void> _limparCacheECarregar() async {
+    await _controller.clearCache(); // Limpa o cache apenas ao iniciar
+    _controller
+        .loadRequest(Uri.parse('https://flyer-admin-ui.flutterflow.app/'));
   }
 
   @override
