@@ -47,7 +47,7 @@ class _MyAppState extends State<MyApp> {
 
   Future<void> _limparCacheECarregar() async {
     await _controller.clearCache();
-    _controller.loadRequest(Uri.parse(String.fromEnvironment("APP_URL")));
+    _controller.loadRequest(Uri.parse(appUrl));
   }
 
   Future<void> _habilitarUploads() async {
