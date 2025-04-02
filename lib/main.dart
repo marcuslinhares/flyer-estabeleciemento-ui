@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:webview_flutter_android/webview_flutter_android.dart';
@@ -9,7 +10,7 @@ void main() {
 
 class MyApp extends StatefulWidget {
   const MyApp({super.key});
-  const String appUrl = String.fromEnvironment("APP_URL");
+  static const String appUrl = String.fromEnvironment("APP_URL");
 
   @override
   State<MyApp> createState() => _MyAppState();
@@ -36,36 +37,36 @@ class _MyAppState extends State<MyApp> {
             debugPrint('Página carregada: $url');
           },
           onWebResourceError: (WebResourceError error) {
-            debugPrint("Erro: \${error.description}");
+            debugPrint("Erro: ${error.description}");
           },
         ),
       );
-    
+
     _habilitarUploads();
     _limparCacheECarregar();
   }
 
   Future<void> _limparCacheECarregar() async {
     await _controller.clearCache();
-    _controller.loadRequest(Uri.parse(appUrl));
+    _controller.loadRequest(Uri.parse(MyApp.appUrl));
   }
 
-  Future<void> _habilitarUploads() async {
-  	if (_controller.platform is WebViewAndroidController) {
-    	final androidController = _controller.platform as WebViewAndroidController;
-	
-    	await androidController.setOnShowFileSelector((params) async {
-	
-      	final result = await FilePicker.platform.pickFiles();
-      	
-      	if (result != null && result.files.isNotEmpty) {
-        	final filePath = result.files.single.path;
-        	return [filePath!];
-      	}
-	
-      	return null;
-    	});
-  	}
+  Future<List<String>> _androidFilePicker(FileSelectorParams params) async {
+    final result = await FilePicker.platform.pickFiles();
+    if (result != null && result.files.single.path != null) {
+      final file = File(result.files.single.path!);
+      return [file.uri.toString()];
+    }
+    return [];
+  }
+
+  void _habilitarUploads() async {
+    if (Platform.isAndroid &&
+        _controller.platform is AndroidWebViewController) {
+      final androidController =
+          _controller.platform as AndroidWebViewController;
+      await androidController.setOnShowFileSelector(_androidFilePicker);
+    }
   }
 
   @override
@@ -73,9 +74,9 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: Scaffold(
-		body: SafeArea(
-  		child: WebViewWidget(controller: _controller),
-		),
+        body: SafeArea(
+          child: WebViewWidget(controller: _controller),
+        ),
       ),
     );
   }
