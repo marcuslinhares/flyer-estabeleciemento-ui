@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
+import 'package:webview_flutter_android/webview_flutter_android.dart';
+import 'package:file_picker/file_picker.dart';
 
 void main() {
   runApp(const MyApp());
@@ -7,6 +9,7 @@ void main() {
 
 class MyApp extends StatefulWidget {
   const MyApp({super.key});
+  const String appUrl = String.fromEnvironment("APP_URL");
 
   @override
   State<MyApp> createState() => _MyAppState();
@@ -20,15 +23,49 @@ class _MyAppState extends State<MyApp> {
     super.initState();
     _controller = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
-      ..setBackgroundColor(Colors.white);
-
+      ..setBackgroundColor(Colors.white)
+      ..setNavigationDelegate(
+        NavigationDelegate(
+          onProgress: (int progress) {
+            debugPrint("Carregando: $progress%");
+          },
+          onPageStarted: (String url) {
+            debugPrint('Página iniciada: $url');
+          },
+          onPageFinished: (String url) {
+            debugPrint('Página carregada: $url');
+          },
+          onWebResourceError: (WebResourceError error) {
+            debugPrint("Erro: \${error.description}");
+          },
+        ),
+      );
+    
+    _habilitarUploads();
     _limparCacheECarregar();
   }
 
   Future<void> _limparCacheECarregar() async {
-    await _controller.clearCache(); // Limpa o cache apenas ao iniciar
-    _controller
-        .loadRequest(Uri.parse('https://flyer-admin-ui.flutterflow.app/'));
+    await _controller.clearCache();
+    _controller.loadRequest(Uri.parse(String.fromEnvironment("APP_URL")));
+  }
+
+  Future<void> _habilitarUploads() async {
+  	if (_controller.platform is WebViewAndroidController) {
+    	final androidController = _controller.platform as WebViewAndroidController;
+	
+    	await androidController.setOnShowFileSelector((params) async {
+	
+      	final result = await FilePicker.platform.pickFiles();
+      	
+      	if (result != null && result.files.isNotEmpty) {
+        	final filePath = result.files.single.path;
+        	return [filePath!];
+      	}
+	
+      	return null;
+    	});
+  	}
   }
 
   @override
@@ -36,7 +73,9 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: Scaffold(
-        body: WebViewWidget(controller: _controller),
+		body: SafeArea(
+  		child: WebViewWidget(controller: _controller),
+		),
       ),
     );
   }

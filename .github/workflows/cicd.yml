@@ -5,6 +5,9 @@ on:
     branches:
       - main
 
+env:
+  APP_URL: ${{ secrets.APP_URL }}
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -22,7 +25,7 @@ jobs:
         run: flutter pub get
 
       - name: Build APK
-        run: flutter build apk --release
+        run: flutter build apk --release --dart-define=APP_URL=${{ env.APP_URL }}
 
       - name: Upload APK as artifact
         uses: actions/upload-artifact@v4
